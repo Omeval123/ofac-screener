@@ -89,6 +89,12 @@ def download_and_parse_ofac() -> None:
         logger.info("Downloaded %s bytes. Parsing XML ...", f"{len(response.content):,}")
 
         root = ET.fromstring(response.content)
+
+        # Strip XML namespaces so tag searches work regardless of OFAC schema version
+        for elem in root.iter():
+            if "}" in elem.tag:
+                elem.tag = elem.tag.split("}", 1)[1]
+
         new_data: dict = {}
 
         for entry in root.iter("sdnEntry"):
